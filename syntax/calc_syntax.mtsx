@@ -1,0 +1,71 @@
+{
+    name: ["CALC", ".calc"]
+    ignoreCase: false
+
+    comment: {startsWith: "#", addToContains: false}
+
+    styles: [
+        "error"         #F50000$FFEDED    #BC3F3C$443034    @_
+        "errorBold"     #F50000$FFEDED    #BC3F3C$443034    @B
+        "comment"       #8C8C8C    #808080    @I
+        "constant"      #871094    #9876AA    @_
+        "func"          #795E26    #DCDCAA    @_
+        "operator"      #205060    #508090    @_
+        "assign"        #0033B3    #CC7832    @B
+        "register"      #6F42C1    #B392F0    @I
+        "standard_reg"  #7050E0    #6080B0    @_
+        "indicator_reg" #800000    #AE8ABE    @_
+        "readonly"      #9E880D    #BBB529    @I
+        "number"        #1750EB    #6897BB    @_
+        "special"       #000000    #FFFFFF    @BIU
+        "initMarker"    #067D17$F0FCEE    #79A978$2D3B3F    @B
+        "initBlock"     #000000$F0FCEE    #A9B7C6$2D3B3F    @_
+        "jccMarker"     #8B7500$FFF8C5    #E5D27A$3A3200    @B
+        "jccBlock"      #000000$FFF8C5    #A9B7C6$3A3200    @_
+    ]
+
+    defines: [
+        "commonRules": [
+            { match: /\bRan(?:Int)?#/                            0: "func"           }
+            { match: /\b(?:sin|cos|tan|ln|log|Int|Not|Neg)\b/    0: "func"           }
+            { match: /π|\b(?:pi|e)\b/                            0: "constant"       }
+            { match: /\b(?:PreAns|Ans)\b/                        0: "readonly"       }
+            { match: /\b[xy]\b/                                  0: "standard_reg"   }
+            { match: /\bM\b/                                     0: "indicator_reg"  }
+            { match: /\b[A-DF]\b|@/                              0: "register"       }
+            { match: /#.*/                                       0: "comment"        }
+            { builtin: #C_NUMBER# }
+            { match: /->/                                        0: "assign"         }
+            { match: /=/                                         0: "assign"         }
+            { match: /\b(?:and|or|xor|xnor)\b/                   0: "operator"       }
+            { match: /[\-+*\/×÷%^(),]/                            0: "operator"       }
+        ]
+        "jccRule": {
+            start: {match: /(?m)#\$ JCC[ \t]+\S+[ \t]*$/,     0: "jccMarker"}
+            end:   {match: /(?m)#\$ JCC_END[ \t]+\S+[ \t]*$/, 0: "jccMarker"}
+            style: "jccBlock"
+            contains: [
+                { match: /(?m)^(#!!)(.*?)(;[^;\n]*)?$/, 1: "errorBold", 2: "error", 3: "errorBold" }
+                { include: "commonRules" }
+                { include: "jccRule" }
+            ]
+        }
+    ]
+
+    contains: [
+        { match: /(?m)^(#!!)(.*?)(;[^;\n]*)?$/, 1: "errorBold", 2: "error", 3: "errorBold" }
+        { match: /(?m)^(#\?[^\n]*)(\n(?:[ \t]*\n)*)([ \t]*x:[ \t]*)$/, 1: "special", 3: "comment" }
+        { match: /(?m)^#\?.*/, 0: "special" }
+        {
+            start: {match: /(?m)#\$ INIT[ \t]*$/,     0: "initMarker"}
+            end:   {match: /(?m)#\$ INIT_END[ \t]*$/, 0: "initMarker"}
+            style: "initBlock"
+            contains: [
+                { match: /(?m)^(#!!)(.*?)(;[^;\n]*)?$/, 1: "errorBold", 2: "error", 3: "errorBold" }
+                { include: "commonRules" }
+            ]
+        }
+        { include: "jccRule" }
+        { include: "commonRules" }
+    ]
+}
